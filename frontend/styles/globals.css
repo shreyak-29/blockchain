@@ -1,5 +1,49 @@
 @import "tailwindcss";
 
+/* ================= CSS VARIABLES ================= */
+
+:root {
+  --bg-primary: #f9fafb;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --gradient-start: #1e3a8a;
+  --gradient-end: #7e22ce;
+  --success-bg: #d1fae5;
+  --success-text: #065f46;
+  --success-border: #10b981;
+  --error-bg: #fee2e2;
+  --error-text: #991b1b;
+  --error-border: #ef4444;
+  --info-bg: #dbeafe;
+  --info-text: #1e40af;
+  --info-border: #3b82f6;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border-color: #334155;
+  --gradient-start: #3b82f6;
+  --gradient-end: #a855f7;
+  --success-bg: #064e3b;
+  --success-text: #6ee7b7;
+  --success-border: #10b981;
+  --error-bg: #7f1d1d;
+  --error-text: #fca5a5;
+  --error-border: #ef4444;
+  --info-bg: #1e3a8a;
+  --info-text: #93c5fd;
+  --info-border: #3b82f6;
+  --shadow: rgba(0, 0, 0, 0.3);
+}
+
 /* ================= BASE ================= */
 
 @layer base {
@@ -8,66 +52,301 @@
   }
 
   body {
-    @apply bg-gray-50 text-gray-900 font-sans;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    @apply font-sans transition-colors duration-300;
   }
 
   h1 {
     @apply text-4xl font-bold mb-4;
+    color: var(--text-primary);
   }
 
   h2 {
     @apply text-2xl font-bold mb-4;
+    color: var(--text-primary);
   }
 
   h3 {
     @apply text-xl font-bold mb-2;
+    color: var(--text-primary);
   }
 
   p {
-    @apply mb-4 text-gray-600;
+    @apply mb-4;
+    color: var(--text-secondary);
   }
 }
 
 /* ================= COMPONENTS ================= */
 
 @layer components {
+  /* ================= NAVBAR ================= */
 
-  /* Navbar */
-
-  .navbar {
-    @apply sticky top-0 z-50 bg-gradient-to-r from-blue-900 to-purple-700 text-white shadow-md;
+  .navbar-wrapper {
+    @apply sticky top-0 z-50;
+    background: linear-gradient(
+      90deg,
+      var(--gradient-start) 0%,
+      var(--gradient-end) 100%
+    );
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  .navbar-container {
-    @apply max-w-6xl mx-auto px-6 py-4 flex justify-between items-center;
+  .navbar-main {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex justify-between items-center gap-4;
   }
 
-  .navbar-brand {
-    @apply text-2xl font-bold text-white no-underline;
+  /* Logo */
+  .navbar-left {
+    @apply flex-shrink-0;
   }
 
-  .navbar-links {
-    @apply flex gap-8 list-none;
+  .navbar-logo {
+    @apply text-lg sm:text-2xl font-bold text-white no-underline flex items-center gap-2 sm:gap-3 transition-all duration-300 hover:scale-105 active:scale-95;
   }
 
-  .navbar-links a {
-    @apply text-white font-medium text-sm px-3 py-2 rounded-lg transition-all relative;
+  .logo-icon {
+    @apply text-2xl sm:text-3xl;
   }
 
-  .navbar-links a:hover {
-    @apply bg-white/10;
+  .logo-text {
+    @apply hidden sm:inline font-extrabold tracking-tight;
+  }
+
+  /* Navigation Links (Desktop) */
+  .navbar-middle {
+    @apply hidden md:flex flex-1 justify-center;
+  }
+
+  .navbar-links-list {
+    @apply flex list-none gap-1 lg:gap-2 m-0 p-0;
+  }
+
+  .navbar-link {
+    @apply text-white text-sm lg:text-base font-semibold px-3 lg:px-5 py-2 rounded-lg transition-all duration-200 hover:bg-white/20 active:bg-white/30 active:scale-95 no-underline;
+  }
+
+  /* Right Group */
+  .navbar-right-group {
+    @apply flex items-center gap-1.5 sm:gap-2 lg:gap-3 flex-shrink-0;
+  }
+
+  .navbar-info {
+    @apply hidden lg:flex;
+  }
+
+  /* Wallet Button */
+  .wallet-button {
+    @apply inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all duration-200 border-none cursor-pointer whitespace-nowrap;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    &:hover:not(:disabled) {
+      @apply bg-white/25;
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    &:active:not(:disabled) {
+      @apply scale-95;
+    }
+
+    &:disabled {
+      @apply opacity-65 cursor-not-allowed;
+    }
+
+    &.connected {
+      @apply bg-gradient-to-r from-green-500/20 to-emerald-500/20;
+      border-color: rgba(16, 185, 129, 0.4);
+
+      &:hover:not(:disabled) {
+        @apply from-green-500/30 to-emerald-500/30;
+        border-color: rgba(16, 185, 129, 0.6);
+      }
+
+      .wallet-status {
+        @apply text-base font-bold;
+      }
+
+      .wallet-address {
+        @apply hidden sm:inline text-xs font-mono tracking-tight;
+      }
+    }
+
+    &.disconnected {
+      @apply bg-gradient-to-r from-blue-500/20 to-purple-500/20;
+      border-color: rgba(59, 130, 246, 0.4);
+
+      &:hover:not(:disabled) {
+        @apply from-blue-500/30 to-purple-500/30;
+        border-color: rgba(59, 130, 246, 0.6);
+      }
+    }
+  }
+
+  .wallet-icon {
+    @apply text-base;
+  }
+
+  .wallet-status {
+    @apply text-lg;
+  }
+
+  .spinner {
+    @apply inline-block w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full;
+    animation: spin 0.8s linear infinite;
+  }
+
+  /* Theme Toggle */
+  .theme-toggle {
+    @apply px-2.5 sm:px-3 py-2 rounded-lg text-lg sm:text-xl cursor-pointer transition-all duration-200 border-none font-bold;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    &:hover {
+      @apply bg-white/25;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    &:active {
+      @apply scale-90;
+    }
+  }
+
+  /* Mobile Menu Button */
+  .mobile-menu-button {
+    @apply md:hidden flex flex-col gap-1.5 p-2 rounded-lg border-none cursor-pointer transition-all duration-200;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    &:hover {
+      @apply bg-white/25;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    &:active {
+      @apply scale-95;
+    }
+  }
+
+  .menu-icon {
+    @apply block w-5 h-0.5 bg-white transition-all duration-300;
+
+    &.open:nth-child(1) {
+      transform: rotate(45deg) translate(8px, 8px);
+    }
+
+    &.open:nth-child(2) {
+      opacity: 0;
+    }
+
+    &.open:nth-child(3) {
+      transform: rotate(-45deg) translate(7px, -7px);
+    }
+  }
+
+  /* Mobile Menu */
+  .mobile-menu {
+    @apply md:hidden border-t border-white/20 px-4 sm:px-6 py-4 bg-white/5 backdrop-blur-lg;
+    animation: slide-down 0.3s ease;
+  }
+
+  .mobile-links {
+    @apply list-none m-0 p-0 flex flex-col gap-2;
+  }
+
+  .mobile-link {
+    @apply block text-white text-base font-semibold px-4 py-3 rounded-lg transition-all duration-200 hover:bg-white/20 active:bg-white/30 active:scale-95 no-underline;
+  }
+
+  .mobile-divider {
+    @apply my-4 border-t border-white/20;
+  }
+
+  .mobile-wallet-button {
+    @apply w-full justify-center;
+  }
+
+  /* ================= NETWORK INFO ================= */
+
+  .network-info {
+    @apply flex flex-wrap gap-2 sm:gap-3 items-center px-3 sm:px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg;
+  }
+
+  .network-badge {
+    @apply flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 bg-white/20 rounded-md text-xs sm:text-sm;
+  }
+
+  .badge-label {
+    @apply font-semibold text-white/80 hidden sm:inline;
+  }
+
+  .badge-value {
+    @apply text-white font-mono text-xs;
+  }
+
+  .explorer-link {
+    @apply ml-2 text-white hover:text-yellow-300 transition-colors;
+  }
+
+  /* ================= RESPONSIVE ================= */
+
+  @media (max-width: 639px) {
+    .navbar-main {
+      @apply px-3 py-3 gap-2;
+    }
+
+    .navbar-logo {
+      @apply text-lg;
+    }
+
+    .logo-text {
+      @apply hidden;
+    }
+
+    .navbar-info {
+      @apply hidden;
+    }
+
+    .wallet-button {
+      @apply px-2 py-1.5 text-xs;
+
+      &.connected .wallet-address {
+        @apply hidden;
+      }
+    }
+  }
+
+  @media (max-width: 767px) {
+    .navbar-middle {
+      @apply hidden;
+    }
+
+    .navbar-info {
+      @apply hidden;
+    }
   }
 
   /* Layout */
 
   .main-container {
-    @apply max-w-6xl mx-auto px-6 py-12 min-h-screen;
+    @apply max-w-7xl mx-auto px-6 py-12 min-h-screen;
   }
 
   /* Cards */
 
   .card {
-    @apply bg-white rounded-lg p-8 shadow-md transition-all duration-300;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    @apply rounded-lg p-8 shadow-md transition-all duration-300;
   }
 
   .card:hover {
@@ -75,15 +354,24 @@
   }
 
   .card-header {
-    @apply mb-8 border-b-2 border-gray-200 pb-6;
+    @apply mb-8 pb-6;
+    border-bottom: 2px solid var(--border-color);
   }
 
   .card-header h2 {
-    @apply text-blue-900;
+    background: linear-gradient(
+      135deg,
+      var(--gradient-start),
+      var(--gradient-end)
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .card-header p {
-    @apply mt-2 text-gray-600 text-sm;
+    @apply mt-2 text-sm;
+    color: var(--text-secondary);
   }
 
   .card-body {
@@ -91,7 +379,7 @@
   }
 
   .centered-card {
-    @apply max-w-md mx-auto;
+    @apply max-w-2xl mx-auto;
   }
 
   .grid-2 {
@@ -105,24 +393,30 @@
   }
 
   .form-group label {
-    @apply font-semibold text-gray-900 text-sm;
+    @apply font-semibold text-sm;
+    color: var(--text-primary);
   }
 
   .form-group input,
   .form-group textarea,
   .form-group select {
-    @apply px-4 py-3 border border-gray-300 rounded-lg text-base bg-white text-gray-900 transition-all duration-150;
+    @apply px-4 py-3 rounded-lg text-base transition-all duration-150;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
     font-family: inherit;
   }
 
   .form-group input:focus,
   .form-group textarea:focus,
   .form-group select:focus {
-    @apply outline-none border-blue-900 ring-4 ring-blue-900/10;
+    @apply outline-none ring-4;
+    border-color: var(--gradient-start);
+    ring-color: rgba(59, 130, 246, 0.1);
   }
 
   .form-group input::placeholder {
-    @apply text-gray-600;
+    color: var(--text-secondary);
   }
 
   .form-group textarea {
@@ -130,22 +424,30 @@
     min-height: 6rem;
   }
 
+  .form-hint {
+    @apply text-xs mt-1;
+    color: var(--text-secondary);
+  }
+
   /* Buttons */
 
   .btn {
-    @apply px-6 py-3 rounded-lg text-base font-semibold cursor-pointer transition-all duration-150 inline-block text-center select-none;
+    @apply px-6 py-3 rounded-lg text-base font-semibold cursor-pointer transition-all duration-150 inline-block text-center select-none border-none;
   }
 
   .btn-primary {
-    @apply bg-gradient-to-r from-blue-900 to-blue-800 text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm;
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    @apply text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm;
   }
 
   .btn-secondary {
-    @apply bg-purple-700 text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:bg-purple-800 active:translate-y-0 active:shadow-sm;
+    background: linear-gradient(135deg, #7e22ce, #a855f7);
+    @apply text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm;
   }
 
   .btn-accent {
-    @apply bg-green-500 text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:bg-green-600 active:translate-y-0 active:shadow-sm;
+    background: linear-gradient(135deg, #059669, #10b981);
+    @apply text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm;
   }
 
   .btn-block {
@@ -159,26 +461,37 @@
   /* Alerts */
 
   .alert {
-    @apply px-6 py-4 rounded-lg mb-4 flex items-center gap-4;
+    @apply px-6 py-4 rounded-lg mb-4;
     animation: slide-in 0.3s ease;
   }
 
   .alert-success {
-    @apply bg-emerald-100 text-emerald-900 border-l-4 border-green-500;
+    background-color: var(--success-bg);
+    color: var(--success-text);
+    border-left: 4px solid var(--success-border);
   }
 
   .alert-error {
-    @apply bg-red-100 text-red-900 border-l-4 border-red-500;
+    background-color: var(--error-bg);
+    color: var(--error-text);
+    border-left: 4px solid var(--error-border);
   }
 
   .alert-info {
-    @apply bg-blue-100 text-blue-900 border-l-4 border-blue-900;
+    background-color: var(--info-bg);
+    color: var(--info-text);
+    border-left: 4px solid var(--info-border);
   }
 
   /* Hero */
 
   .hero {
-    @apply bg-gradient-to-r from-blue-900 to-purple-700 text-white px-6 py-12 text-center rounded-lg mb-12;
+    background: linear-gradient(
+      135deg,
+      var(--gradient-start),
+      var(--gradient-end)
+    );
+    @apply text-white px-6 py-12 text-center rounded-lg mb-12 shadow-lg;
   }
 
   .hero h1 {
@@ -192,11 +505,14 @@
   /* Property */
 
   .property-card {
-    @apply bg-white border-l-4 border-blue-900 p-6 rounded-lg mt-6;
+    background-color: var(--bg-secondary);
+    border-left: 4px solid var(--gradient-start);
+    @apply p-6 rounded-lg mt-6;
   }
 
   .property-item {
-    @apply flex justify-between py-2 border-b border-gray-200;
+    @apply flex flex-col sm:flex-row justify-between py-3 gap-2;
+    border-bottom: 1px solid var(--border-color);
   }
 
   .property-item:last-child {
@@ -204,23 +520,83 @@
   }
 
   .property-label {
-    @apply font-semibold text-blue-900 min-w-max;
+    @apply font-semibold min-w-max;
+    color: var(--gradient-start);
   }
 
   .property-value {
-    @apply text-gray-900 break-all;
+    @apply break-all;
+    color: var(--text-primary);
   }
 
+  .owner-address {
+    @apply flex flex-col sm:flex-row gap-2 items-start sm:items-center;
+  }
+
+  .owner-address code {
+    background-color: var(--bg-primary);
+    @apply px-2 py-1 rounded text-xs;
+  }
+
+  /* Transaction Details */
+
+  .tx-details-grid {
+    @apply space-y-4 mt-4;
+  }
+
+  .tx-detail-item {
+    @apply flex flex-col gap-2;
+  }
+
+  .tx-detail-label {
+    @apply font-semibold text-sm;
+  }
+
+  .tx-detail-value {
+    @apply flex flex-col gap-2;
+  }
+
+  .tx-hash-code {
+    background-color: rgba(255, 255, 255, 0.2);
+    @apply px-3 py-2 rounded text-xs font-mono break-all border border-white/20;
+  }
+
+  .explorer-btn {
+    @apply inline-block px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold transition-all;
+  }
+
+  .tx-stats {
+    @apply grid grid-cols-2 gap-3 mt-4 pt-4;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .tx-stat {
+    @apply flex flex-col gap-1 p-3 bg-white/10 rounded-lg;
+  }
+
+  .stat-label {
+    @apply text-xs font-semibold opacity-80;
+  }
+
+  .stat-value {
+    @apply text-base font-bold;
+  }
+
+  .status-success {
+    @apply text-green-300;
+  }
+
+  .btn-link {
+    @apply font-semibold text-sm underline whitespace-nowrap transition-colors;
+  }
 }
 
 /* ================= UTILITIES ================= */
 
 @layer utilities {
-
   .animate-slide-in {
     animation: slide-in 0.3s ease;
   }
-
 }
 
 /* ================= KEYFRAMES ================= */
@@ -234,5 +610,51 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .navbar-container {
+    @apply flex-col items-start;
+  }
+
+  .navbar-right {
+    @apply w-full justify-between;
+  }
+
+  .network-info {
+    @apply w-full;
+  }
+
+  .grid-2 {
+    @apply grid-cols-1;
+  }
+
+  .tx-stats {
+    @apply grid-cols-1;
   }
 }

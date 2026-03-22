@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Navbar from "../components/Navbar";
-import { getContract } from "../utils/contract";
+import { getContract, getNetworkInfo, getExplorerUrl } from "../utils/contract";
+import { ethers } from "ethers";
 
 export default function View() {
   const [id, setId] = useState("");
@@ -8,6 +9,7 @@ export default function View() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [searched, setSearched] = useState(false);
+  const [network, setNetwork] = useState(null);
 
   const search = async () => {
     if (!id) {
@@ -21,13 +23,45 @@ export default function View() {
       setData(null);
       setSearched(false);
 
-      const contract = await getContract();
-      const property = await contract.getProperty(id);
+      const netInfo = await getNetworkInfo();
+      setNetwork(netInfo);
 
-      setData(property);
+      const contract = await getContract();
+      
+      // Call getProperty with proper type conversion
+      const result = await contract.getProperty(BigInt(id));
+      
+      // Check if property exists (owner address is not zero address)
+      if (result[3] === "0x0000000000000000000000000000000000000000") {
+        setError("Property not found. Please register this property first.");
+        setSearched(true);
+        return;
+      }
+      
+      // Convert result to proper format
+      const propertyData = {
+        id: result[0].toString(),
+        location: result[1],
+        price: result[2],
+        owner: result[3]
+      };
+
+      setData(propertyData);
       setSearched(true);
     } catch (err) {
-      setError(err.message || "Property not found");
+      console.error("Error fetching property:", err);
+      
+      // Better error messages
+      if (err.message.includes("could not decode")) {
+        setError("Property not found. Please register this property first.");
+      } else if (err.message.includes("user rejected")) {
+        setError("Transaction rejected by user.");
+      } else if (err.message.includes("network")) {
+        setError("Network error. Please check your connection.");
+      } else {
+        setError("Property not found or does not exist. Please register it first.");
+      }
+      
       setSearched(true);
     } finally {
       setLoading(false);
@@ -37,6 +71,15 @@ export default function View() {
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
       search();
+    }
+  };
+
+  const formatPrice = (weiValue) => {
+    try {
+      const eth = ethers.formatEther(weiValue);
+      return `${parseFloat(eth).toFixed(4)} ETH (${weiValue.toString()} Wei)`;
+    } catch {
+      return `${weiValue.toString()} Wei`;
     }
   };
 
@@ -76,7 +119,7 @@ export default function View() {
                 className="btn btn-accent btn-block"
                 disabled={loading}
               >
-                {loading ? "Searching..." : "Search Property"}
+                {loading ? "⏳ Searching..." : "Search Property"}
               </button>
             </div>
           </div>
@@ -84,33 +127,37 @@ export default function View() {
           {searched && data && (
             <div className="card" style={{ marginTop: "24px" }}>
               <div className="card-header">
-                <h3>Property Details</h3>
+                <h3>✅ Property Found</h3>
               </div>
               <div className="property-card">
                 <div className="property-item">
-                  <span className="property-label">Property ID:</span>
-                  <span className="property-value">{data[0]?.toString()}</span>
+                  <span className="property-label">🆔 Property ID:</span>
+                  <span className="property-value">{data.id}</span>
                 </div>
                 <div className="property-item">
-                  <span className="property-label">Location:</span>
-                  <span className="property-value">{data[1]}</span>
+                  <span className="property-label">📍 Location:</span>
+                  <span className="property-value">{data.location}</span>
                 </div>
                 <div className="property-item">
-                  <span className="property-label">Price (Wei):</span>
-                  <span className="property-value">{data[2]?.toString()}</span>
+                  <span className="property-label">💰 Price:</span>
+                  <span className="property-value">{formatPrice(data.price)}</span>
                 </div>
                 <div className="property-item">
-                  <span className="property-label">Owner Address:</span>
-                  <span className="property-value">{data[3]}</span>
+                  <span className="property-label">👤 Owner Address:</span>
+                  <div className="owner-address">
+                    <code className="property-value">{data.owner}</code>
+                    {network?.explorer && (
+                      <a 
+                        href={getExplorerUrl("address", data.owner, network.explorer)} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="btn-link"
+                      >
+                        View on Explorer 🔗
+                      </a>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {searched && !data && !error && (
-            <div className="card" style={{ marginTop: "24px" }}>
-              <div className="alert alert-info">
-                ℹ️ No results found for the given property ID
               </div>
             </div>
           )}
