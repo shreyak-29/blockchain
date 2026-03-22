@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/* ================= CSS VARIABLES FOR THEME ================= */
+
+:root {
+  --bg-primary: #f9fafb;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border-color: #334155;
+  --shadow: rgba(0, 0, 0, 0.3);
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: light;
+}
+
+[data-theme="dark"] html {
+  color-scheme: dark;
+}
+
+body {
+  @apply transition-colors duration-300;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* ================= ANIMATIONS ================= */
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin-smooth {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-smooth {
+  animation: spin-smooth 0.8s linear infinite;
+}
+
+/* ================= UTILITY CLASSES ================= */
+
+.glass-effect {
+  @apply backdrop-blur-md bg-white/10 border border-white/20;
+}
+
+.glass-effect-light {
+  @apply backdrop-blur-xl bg-white/20 border border-white/30;
+}
+
+.gradient-primary {
+  background-image: linear-gradient(90deg, #1e3a8a 0%, #7e22ce 100%);
+}
+
+[data-theme="dark"] .gradient-primary,
+.dark .gradient-primary {
+  background-image: linear-gradient(90deg, #3b82f6 0%, #a855f7 100%);
+}
+
+.safe-area-padding {
+  @apply px-4 sm:px-6 lg:px-8;
+}
+
+/* ================= SCROLLBAR STYLING ================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+
+  &:hover {
+    background: var(--text-secondary);
+  }
+}
+
+/* ================= PRINTS ================= */
+
+@media print {
+  body {
+    @apply bg-white text-black;
+  }
+}

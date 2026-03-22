@@ -10,14 +10,21 @@ const abi = [
   "function getProperty(uint256 _id) view returns(uint256, string memory, uint256, address)",
 ];
 
+// Type guard for Ethereum provider
+const getEthereumProvider = (): any => {
+  if (typeof window === "undefined") return undefined;
+  return (window as any).ethereum;
+};
+
 export const getContract = async () => {
-  if (!window.ethereum) {
+  const ethereum = getEthereumProvider();
+  if (!ethereum) {
     alert("Please install MetaMask");
     return;
   }
 
   try {
-    const provider = new ethers.BrowserProvider(window.ethereum);
+    const provider = new ethers.BrowserProvider(ethereum);
     const signer = await provider.getSigner();
 
     const contract = new ethers.Contract(contractAddress, abi, signer);
@@ -39,10 +46,11 @@ export const getContract = async () => {
 };
 
 export const getNetworkInfo = async () => {
-  if (!window.ethereum) return null;
+  const ethereum = getEthereumProvider();
+  if (!ethereum) return null;
 
   try {
-    const provider = new ethers.BrowserProvider(window.ethereum);
+    const provider = new ethers.BrowserProvider(ethereum);
     const network = await provider.getNetwork();
 
     const networkNames = {
@@ -78,10 +86,11 @@ export const getNetworkInfo = async () => {
 };
 
 export const getWalletAddress = async () => {
-  if (!window.ethereum) return null;
+  const ethereum = getEthereumProvider();
+  if (!ethereum) return null;
 
   try {
-    const provider = new ethers.BrowserProvider(window.ethereum);
+    const provider = new ethers.BrowserProvider(ethereum);
     const signer = await provider.getSigner();
     return await signer.getAddress();
   } catch (error) {
@@ -111,13 +120,14 @@ export const getExplorerUrl = (type, hash, explorer) => {
 };
 
 export const connectWallet = async () => {
-  if (!window.ethereum) {
+  const ethereum = getEthereumProvider();
+  if (!ethereum) {
     toast.error("MetaMask not installed. Please install it to continue.");
     return null;
   }
 
   try {
-    const accounts = await window.ethereum.request({
+    const accounts = await ethereum.request({
       method: "eth_requestAccounts",
     });
 
@@ -145,7 +155,6 @@ export const disconnectWallet = async () => {
     // Note: MetaMask doesn't have a built-in disconnect,
     // but we can clear the connection by removing event listeners
     // and resetting the app state
-    toast.success("Wallet disconnected");
     return true;
   } catch (error) {
     toast.error("Error disconnecting wallet");
@@ -155,3 +164,4 @@ export const disconnectWallet = async () => {
 };
 
 export { contractAddress };
+
