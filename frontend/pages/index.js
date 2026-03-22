@@ -1,7 +1,20 @@
 import Link from "next/link";
 import Navbar from "../components/Navbar";
+import { useState, useEffect } from "react";
+import { getNetworkInfo, contractAddress } from "../utils/contract";
 
 export default function Home() {
+  const [network, setNetwork] = useState(null);
+
+  const loadNetwork = async () => {
+    const netInfo = await getNetworkInfo();
+    setNetwork(netInfo);
+  };
+ 
+  useEffect(() => {
+    loadNetwork();
+  }, []);
+
   return (
     <>
       <Navbar />
@@ -11,6 +24,16 @@ export default function Home() {
           <p>
             Secure, transparent property ownership management using Web3 technology
           </p>
+          {network && (
+            <div style={{ marginTop: "1rem", fontSize: "0.9rem", opacity: 0.9 }}>
+              Connected to: <strong>{network.name}</strong>
+              {network.chainId === 31337 && (
+                <div style={{ marginTop: "0.5rem", fontSize: "0.85rem" }}>
+                  ⚠️ Local Development Network - For testing only
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="grid-2">
@@ -68,9 +91,34 @@ export default function Home() {
                 Connect your wallet to securely manage your properties using
                 blockchain technology. Your data, your control.
               </p>
-              <button className="btn btn-primary btn-block" disabled>
-                Connect Wallet
-              </button>
+              <div style={{ fontSize: "0.75rem", marginTop: "1rem", color: "#666" }}>
+                <strong>Contract:</strong><br />
+                <code style={{ fontSize: "0.7rem", wordBreak: "break-all" }}>
+                  {contractAddress}
+                </code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card" style={{ marginTop: "2rem" }}>
+          <div className="card-header">
+            <h3>ℹ️ How It Works</h3>
+          </div>
+          <div className="card-body">
+            <div style={{ display: "grid", gap: "1rem" }}>
+              <div>
+                <strong>1. Connect Wallet</strong> - Use MetaMask to connect your Ethereum wallet
+              </div>
+              <div>
+                <strong>2. Register Property</strong> - Add property details (ID, location, price) to the blockchain
+              </div>
+              <div>
+                <strong>3. View on Blockchain</strong> - All transactions are recorded permanently and transparently
+              </div>
+              <div>
+                <strong>4. Transfer Ownership</strong> - Securely transfer property to new owners with blockchain verification
+              </div>
             </div>
           </div>
         </div>
