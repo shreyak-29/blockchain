@@ -1,74 +1,70 @@
 import { ethers } from "ethers";
-import L from "leaflet";
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import Navbar from "../components/Navbar";
 import { getContract, getExplorerUrl, getNetworkInfo } from "../utils/contract";
 
-// Fix leaflet marker icons
-const defaultIcon = L.icon({
-  iconUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-  iconRetinaUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-  shadowUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
+// Dynamic import to avoid SSR issues with Leaflet
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  {
+    ssr: false,
+  },
+);
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  {
+    ssr: false,
+  },
+);
+const Marker = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Marker),
+  {
+    ssr: false,
+  },
+);
+const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
+  ssr: false,
 });
 
-const greenIcon = L.icon({
-  iconUrl:
-    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
-  shadowUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
+// MapController component - must be dynamic to use useMap hook
+const MapController = dynamic(
+  () =>
+    import("react-leaflet").then((mod) => {
+      const { useMap } = mod;
+      return function MapControllerComponent({ onMapClick, mapRef }) {
+        const map = useMap();
 
-const redIcon = L.icon({
-  iconUrl:
-    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
-  shadowUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
+        useEffect(() => {
+          if (map && mapRef) {
+            mapRef.current = map;
+            map.on("click", (e) => {
+              onMapClick(e.latlng.lat, e.latlng.lng);
+            });
 
-// Function to create colored markers based on transfer count
-// Red = new property, transitions to blue as transfers increase
-const getMarkerIconByTransfers = (transferCount) => {
-  const colors = [
-    "red", // 0 transfers
-    "orange", // 1 transfer
-    "yellow", // 2 transfers
-    "grey", // 3 transfers
-    "violet", // 4+ transfers
-    "blue", // 5+ transfers
-  ];
-  const colorIndex = Math.min(transferCount, colors.length - 1);
-  const color = colors[colorIndex];
+            return () => {
+              map.off("click");
+            };
+          }
+        }, [map, onMapClick, mapRef]);
 
-  const iconUrls = {
-    red: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
-    orange:
-      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png",
-    yellow:
-      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png",
-    grey: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png",
-    violet:
-      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png",
-    blue: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
-  };
+        return null;
+      };
+    }),
+  { ssr: false },
+);
 
-  return L.icon({
-    iconUrl: iconUrls[color],
+let L;
+let greenIcon;
+let getMarkerIconByTransfers;
+
+// Initialize Leaflet only on client side
+if (typeof window !== "undefined") {
+  L = require("leaflet");
+
+  greenIcon = L.icon({
+    iconUrl:
+      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
     shadowUrl:
       "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
     iconSize: [25, 41],
@@ -76,28 +72,35 @@ const getMarkerIconByTransfers = (transferCount) => {
     popupAnchor: [1, -34],
     shadowSize: [41, 41],
   });
-};
 
-// Map click handler and ref component
-const MapController = ({ onMapClick, mapRef }) => {
-  const map = useMap();
+  getMarkerIconByTransfers = (transferCount) => {
+    const colors = ["red", "orange", "yellow", "grey", "violet", "blue"];
+    const colorIndex = Math.min(transferCount, colors.length - 1);
+    const color = colors[colorIndex];
 
-  useEffect(() => {
-    mapRef.current = map;
-
-    map.on("click", (e) => {
-      onMapClick(e.latlng.lat, e.latlng.lng);
-    });
-
-    return () => {
-      map.off("click");
+    const iconUrls = {
+      red: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+      orange:
+        "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png",
+      yellow:
+        "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png",
+      grey: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png",
+      violet:
+        "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png",
+      blue: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
     };
-  }, [map, onMapClick, mapRef]);
 
-  return null;
-};
-
-// No longer needed - using leaflet markers instead
+    return L.icon({
+      iconUrl: iconUrls[color],
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41],
+    });
+  };
+}
 
 export default function Register() {
   const [propertyName, setPropertyName] = useState("");
@@ -463,36 +466,76 @@ export default function Register() {
               </div>
 
               <div className="form-group">
-                <label>
-                  � Search Location (e.g., &quot;Thane, Mumbai&quot;)
-                </label>
-                <form
-                  onSubmit={setLocation}
-                  style={{ display: "flex", gap: "10px" }}
-                >
-                  <input
-                    type="text"
-                    placeholder="Enter city, area, or address..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    disabled={searching}
-                    style={{ flex: 1 }}
-                  />
-                  <button
-                    type="submit"
-                    className="btn btn-secondary"
-                    disabled={searching || !searchQuery.trim()}
-                    style={{ padding: "10px 20px" }}
-                  >
-                    {searching ? "🔍 Searching..." : "🔍 Search"}
-                  </button>
-                </form>
-              </div>
+                <label>📍 Select Location - Search or Click on Map</label>
 
-              <div className="form-group">
-                <label>
-                  📍 Select Location on Map (Click on map to select)
-                </label>
+                {/* In-map integrated search box with autocomplete */}
+                <div
+                  style={{
+                    position: "relative",
+                    marginBottom: "10px",
+                    zIndex: 1000,
+                  }}
+                >
+                  <div style={{ flex: 1, position: "relative" }}>
+                    <input
+                      type="text"
+                      placeholder="🔍 Search: Mumbai, Thane, Kalyan, Dhamankar Naka, etc..."
+                      value={searchQuery}
+                      onChange={(e) => handleSearchInput(e.target.value)}
+                      onFocus={() => searchQuery && setShowSuggestions(true)}
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        borderRadius: "4px",
+                        border: "2px solid #333",
+                        backgroundColor: "#0f1419",
+                        color: "#fff",
+                        marginBottom: "8px",
+                      }}
+                    />
+                    {/* Autocomplete suggestions dropdown */}
+                    {showSuggestions && searchSuggestions.length > 0 && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "100%",
+                          left: 0,
+                          right: 0,
+                          backgroundColor: "#0f1419",
+                          border: "2px solid #333",
+                          borderTop: "none",
+                          maxHeight: "250px",
+                          overflowY: "auto",
+                          zIndex: 1001,
+                          borderRadius: "0 0 4px 4px",
+                        }}
+                      >
+                        {searchSuggestions.map((suggestion, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => selectSuggestion(suggestion)}
+                            style={{
+                              padding: "10px",
+                              borderBottom: "1px solid #333",
+                              cursor: "pointer",
+                              backgroundColor: "#0f1419",
+                              color: "#4CAF50",
+                              fontSize: "13px",
+                            }}
+                            onMouseEnter={(e) => {
+                              e.target.style.backgroundColor = "#1a1e2e";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.target.style.backgroundColor = "#0f1419";
+                            }}
+                          >
+                            {suggestion.name || suggestion.display_name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <div
                   style={{
                     height: "400px",
@@ -617,7 +660,7 @@ export default function Register() {
               <button
                 onClick={register}
                 className="btn btn-primary btn-block"
-                disabled={loading || selectedLat === null}
+                disabled={loading}
               >
                 {loading
                   ? "⏳ Processing Transaction..."
