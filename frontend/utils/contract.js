@@ -1,8 +1,11 @@
 import { ethers } from "ethers";
 import toast from "react-hot-toast";
+import contractAddressData from "../contractAddress.json";
 
-// Local Hardhat Network Contract Address
-const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+// Dynamically fetch contract address from deployment
+const contractAddress =
+  contractAddressData.RealEstate ||
+  "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 const abi = [
   "function registerProperty(uint256 _id, string memory _location, uint256 _price)",

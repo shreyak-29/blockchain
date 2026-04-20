@@ -1,6 +1,9 @@
 {
   "name": "blockchain_project",
   "version": "1.0.0",
+  "scripts": {
+    "node": "node start-hardhat.mjs"
+  },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.1.2",
     "@nomicfoundation/hardhat-ethers": "^3.1.3",
