@@ -1,35 +1,70 @@
 # 🏘️ Blockchain Real Estate Registry
 
-A decentralized application (dApp) for managing property ownership on the Ethereum blockchain. Built with Solidity, Hardhat, Next.js, and Ethers.js.
+A decentralized application (dApp) for managing property ownership on the Ethereum blockchain with advanced features like Google Maps integration, auto-generated Property IDs, and location validation.
 
 ![Blockchain Real Estate](https://img.shields.io/badge/Blockchain-Ethereum-blue)
-![Solidity](https://img.shields.io/badge/Solidity-0.8.28-orange)
+![Solidity](https://img.shields.io/badge/Solidity-0.8.20-orange)
 ![Next.js](https://img.shields.io/badge/Next.js-16.1.6-black)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ## ✨ Features
 
-- 📋 **Register Properties** - Add property details to the blockchain
-- 🔄 **Transfer Ownership** - Securely transfer properties to new owners
-- 🔍 **Verify Properties** - Search and view property information
+### Core Features
+- 📋 **Register Properties** - Add property details with name, location, and price to the blockchain
+- 🏠 **Auto-Generated Property IDs** - Unique IDs are automatically generated for each property
+- 📍 **Google Maps Integration** - Select property location directly from the map
+- 🚫 **Duplicate Prevention** - Prevents multiple properties from being registered at the same location
+- 🔄 **Transfer Ownership** - Securely transfer properties to new owners using Property ID
+- 🔍 **Verify Properties** - Search and view detailed property information
 - 💰 **Gas Fee Tracking** - Real-time gas usage and cost display
-- 🔗 **Block Explorer Integration** - Direct links to Etherscan
-- 🌓 **Dark/Light Mode** - Toggle between themes
-- 🌐 **Multi-Network Support** - Works on Local, Testnet, and Mainnet
-- 📱 **Responsive Design** - Works on all devices
+- 🔗 **Block Explorer Integration** - Direct links to view transactions on Etherscan
+- 🌓 **Dark/Light Mode** - Toggle between themes for better user experience
+- 🌐 **Multi-Network Support** - Works on Local Hardhat, Sepolia Testnet, and Mainnet
+- 📱 **Responsive Design** - Optimized for all devices
+
+### Advanced Features
+- 🗺️ **Interactive Maps** - Real-time visualization of all registered properties
+- 🎯 **Property Name Field** - Add descriptive names to your properties
+- 📌 **Location Coordinates** - Store GPS coordinates with properties
+- 🔐 **Copy Property ID** - Easy clipboard copy functionality for sharing IDs
+- 📊 **Property Analytics** - View registered properties list with details
 
 ## 🛠️ Tech Stack
 
 ### Smart Contract
-- Solidity 0.8.28
-- Hardhat
-- Ethers.js v6
+- **Solidity 0.8.20** - Smart contract language
+- **Hardhat** - Ethereum development environment
+- **Ethers.js v6** - Blockchain interaction library
 
 ### Frontend
-- Next.js 16
-- React 19
-- Tailwind CSS 4
-- Ethers.js v6
+- **Next.js 16** - React framework
+- **React 19** - UI library
+- **Tailwind CSS 4** - Styling
+- **Google Map React** - Map visualization
+- **Ethers.js v6** - Web3 integration
+- **React Hot Toast** - Notifications
+
+## 📋 Smart Contract Structure
+
+### Property Structure
+```solidity
+struct Property {
+    uint id;              // Auto-generated unique ID
+    string name;          // Property name
+    string location;      // Location string
+    uint price;           // Price in Wei
+    address owner;        // Owner wallet address
+    uint latitude;        // GPS latitude (fixed point)
+    uint longitude;       // GPS longitude (fixed point)
+}
+```
+
+### Key Contract Functions
+- `registerProperty()` - Register a new property (returns auto-generated ID)
+- `transferProperty()` - Transfer property ownership
+- `getProperty()` - Retrieve property details by ID
+- `getNextPropertyId()` - Get next available property ID
+- `getAllProperties()` - Get paginated list of all properties
 
 ## 🚀 Quick Start
 
@@ -38,166 +73,209 @@ A decentralized application (dApp) for managing property ownership on the Ethere
 - MetaMask browser extension
 - Git
 
-### Installation
+### Installation & Setup
 
 1. **Clone the repository**
 ```bash
 git clone <your-repo-url>
-cd blockchain_project
-```
-
-2. **Install dependencies**
-```bash
-# Install root dependencies
+cd blockchain
 npm install
-
-# Install frontend dependencies
-cd frontend
-npm install
-cd ..
+cd frontend && npm install && cd ..
 ```
 
-3. **Start local blockchain**
+2. **Start Hardhat Node** (Terminal 1)
 ```bash
-npx hardhat node
+npm run node
 ```
-Keep this terminal running.
+This will:
+- Start a local Ethereum node
+- Auto-deploy the smart contract
+- Save contract address to `frontend/contractAddress.json`
+- Display test accounts with private keys
 
-4. **Deploy contract** (in a new terminal)
-```bash
-npx hardhat run scripts/deploy.js --network localhost
-```
-Note the contract address (usually `0x5FbDB2315678afecb367f032d93F642f64180aa3`)
-
-5. **Configure MetaMask**
-- Add Hardhat Local network:
-  - Network Name: `Hardhat Local`
-  - RPC URL: `http://127.0.0.1:8545`
-  - Chain ID: `31337`
-  - Currency: `ETH`
-- Import a test account using one of the private keys from step 3
-
-6. **Start frontend**
+3. **Run Frontend** (Terminal 2)
 ```bash
 cd frontend
 npm run dev
 ```
+Open [localhost:3000](http://localhost:3000)
 
-7. **Open browser**
-Visit `http://localhost:3000`
+### MetaMask Setup (First Time)
 
-## 📖 Usage
+1. **Add Hardhat Network**
+   - Click MetaMask → Settings → Networks → Add Network
+   - Network Name: `Hardhat Local`
+   - RPC URL: `http://127.0.0.1:8545`
+   - Chain ID: `31337`
+   - Currency: `ETH`
 
-### Register a Property
-1. Go to "Register Property" page
-2. Enter Property ID (e.g., 1)
-3. Enter Location (e.g., "123 Main St, New York")
-4. Enter Price in Wei (e.g., 1000000000000000000 for 1 ETH)
-5. Click "Register Property"
-6. Confirm transaction in MetaMask
-7. View transaction details with gas fees
+2. **Import Test Account**
+   - Click MetaMask → Create Account
+   - Select "Import Account"
+   - Copy private key from Hardhat node output
+   - Paste into MetaMask
+   - You'll have ~10,000 test ETH
 
-### Transfer Property
-1. Go to "Transfer Property" page
-2. Enter Property ID
-3. Enter new owner's Ethereum address
-4. Click "Transfer Property"
-5. Confirm transaction in MetaMask
-6. View transaction on block explorer
+## 📖 Usage Guide
 
-### Verify Property
-1. Go to "Verify Property" page
-2. Enter Property ID
-3. Click "Search Property"
-4. View property details including owner address
+### 1. Registering a Property ✅
 
-## 🌐 Network Support
+**Steps:**
+1. Go to **Register** page
+2. **Enter Property Name** - e.g., "Downtown Penthouse"
+3. **Property ID** - Auto-generated (can copy for later use)
+4. **Click on Map** - Select property location
+   - 🟢 Green marker = Your selection
+   - 🔴 Red markers = Existing properties
+5. **Set Price** - Enter in ETH (e.g., 1.5)
+6. **Click Register** - Confirm in MetaMask
+7. **Save Property ID** - You'll need it for transfers!
 
-The application automatically detects and supports:
+**Important:**
+- Each location can only have one registered property
+- Save the Property ID immediately after registration
+- The map prevents registering within ~100m of existing properties
 
-| Network | Chain ID | Explorer |
-|---------|----------|----------|
-| Hardhat Local | 31337 | - |
-| Ethereum Mainnet | 1 | etherscan.io |
-| Sepolia Testnet | 11155111 | sepolia.etherscan.io |
-| Goerli Testnet | 5 | goerli.etherscan.io |
-| Polygon Mainnet | 137 | polygonscan.com |
-| Mumbai Testnet | 80001 | mumbai.polygonscan.com |
+### 2. Verifying Properties 🔍
 
-## 📦 Smart Contract
+**Steps:**
+1. Go to **Verify** page
+2. Enter **Property ID**
+3. Click **Search**
+4. View all property details:
+   - Name and location
+   - Owner address
+   - Price (in ETH & Wei)
+   - GPS coordinates
+   - Transaction hash
 
-### RealEstate.sol
+### 3. Transferring Ownership 🔄
 
-```solidity
-// Main functions
-function registerProperty(uint256 _id, string memory _location, uint256 _price)
-function transferProperty(uint256 _id, address newOwner)
-function getProperty(uint256 _id) view returns(uint256, string, uint256, address)
-```
+**Steps:**
+1. Go to **Transfer** page
+2. Enter **Property ID** (must be owner)
+3. Enter **New Owner Address**
+4. Confirm transaction
+5. New owner listed immediately
 
-### Contract Structure
-```
-Property {
-  uint256 id;
-  string location;
-  uint256 price;
-  address owner;
-}
-```
+## 🗺️ Map Features
 
-## 🎨 Features in Detail
+- **Click to Select** - Click anywhere to mark your property
+- **Red Markers** - Show all existing properties with names and IDs
+- **Green Marker** - Your selected location while registering
+- **Hover Info** - See property details on marker hover
+- **Duplicate Prevention** - Can't register within 100m of existing properties
 
-### Transaction Details
-Every transaction shows:
-- 📝 Transaction Hash (with Etherscan link)
-- 📦 Block Number (with block explorer link)
-- 👤 From Address (sender)
-- 📍 To Address (contract)
+## 🔐 Security & Features
+
+✅ MetaMask wallet integration  
+✅ Transaction verification  
+✅ Gas fee estimation  
+✅ Owner verification  
+✅ Location-based duplicate prevention  
+✅ Real-time error messages  
+✅ Blockchain transparency  
+
+## 📊 Transaction Details
+
+Every transaction displays:
+- 📝 Transaction Hash (clickable Etherscan link)
+- 📦 Block Number
+- 🏠 Property ID (copyable)
 - ⛽ Gas Used
-- 💰 Gas Price (in Gwei)
-- 💸 Total Gas Fees (in ETH)
-- ✅ Status (Success/Failed)
+- 💰 Gas Price (Gwei)
+- 💸 Total Gas Fees (ETH)
+- ✅ Status
 
-### Error Handling
-- Property not found errors
-- Ownership verification
-- Invalid address format detection
-- Insufficient funds warnings
-- Network error handling
-- User-friendly error messages
+## 🌐 Supported Networks
 
-### Dark/Light Mode
-- Automatic theme persistence
-- Smooth transitions
-- Optimized for both modes
+| Network          | RPC                   | Chain ID | Status       |
+| ---------------- | --------------------- | -------- | ------------ |
+| Hardhat Local    | http://127.0.0.1:8545 | 31337    | ✅ Dev        |
+| Sepolia Testnet  | Configured            | 11155111 | ⚠️ Testnet    |
+| Ethereum Mainnet | Configured            | 1        | ⚠️ Production |
 
-## 🚀 Deployment
+## 💡 Pro Tips
 
-### Testnet (Sepolia)
+- **Always Save Property ID** - Can't recover if lost
+- **Use Unique Names** - Helps identify properties on map
+- **Check Map First** - Avoid duplicate location registrations  
+- **Monitor Gas** - Check before confirming transactions
+- **Test First** - Use Hardhat for testing before Testnet
 
-1. **Get Sepolia ETH**
-   - https://sepoliafaucet.com/
+## 🐛 Troubleshooting
 
-2. **Update hardhat.config.js**
-```javascript
-require("@nomicfoundation/hardhat-toolbox");
-require("dotenv").config();
+| Problem                  | Solution                         |
+| ------------------------ | -------------------------------- |
+| "Cannot connect"         | Ensure `npm run node` is running |
+| "Property exists here"   | Select different location on map |
+| "Insufficient funds"     | Check MetaMask has test ETH      |
+| "MetaMask not connected" | Approve connection in popup      |
+| "Property not found"     | Verify correct Property ID       |
+| "Map not showing"        | Check Google Maps API key        |
 
-module.exports = {
-  solidity: "0.8.28",
-  networks: {
-    sepolia: {
-      url: process.env.SEPOLIA_RPC_URL,
-      accounts: [process.env.PRIVATE_KEY]
-    }
-  }
-};
+## 📁 Project Structure
+
+```
+blockchain/
+├── contracts/
+│   └── RealEstate.sol           # Smart contract
+├── scripts/
+│   └── deploy.js                # Deployment script
+├── frontend/
+│   ├── pages/
+│   │   ├── index.js             # Home
+│   │   ├── register.js          # Register (with maps)
+│   │   ├── transfer.js          # Transfer
+│   │   └── view.js              # Verify
+│   ├── components/
+│   │   ├── Navbar.js
+│   │   ├── NetworkInfo.js
+│   │   └── ThemeToggle.js
+│   ├── utils/
+│   │   └── contract.js
+│   ├── styles/
+│   │   └── globals.css
+│   └── contractAddress.json     # Auto-generated
+├── start-hardhat.mjs            # Auto-deploy script
+└── hardhat.config.js            # Config
 ```
 
-3. **Create .env file**
+## 🔧 Commands
+
+```bash
+# Start with auto-deployment
+npm run node
+
+# Compile contracts
+npx hardhat compile
+
+# Run tests
+npx hardhat test
+
+# Deploy to specific network
+npx hardhat run scripts/deploy.js --network localhost
 ```
-SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/YOUR-API-KEY
-PRIVATE_KEY=your-private-key-here
+
+## 🎯 Future Enhancements
+
+- [ ] Property images
+- [ ] Rental listings
+- [ ] NFT integration
+- [ ] DAO governance
+- [ ] Multi-signature wallets
+- [ ] Advanced analytics
+- [ ] Mobile app
+
+## 📜 License
+
+MIT - Feel free to use and modify!
+
+---
+
+**Questions or Issues?** Open a GitHub issue!
+
+**Built with ❤️ using Blockchain Technology**
 ```
 
 4. **Deploy**
@@ -284,12 +362,12 @@ const networkNames = {
 
 ## 📊 Gas Estimates
 
-| Operation | Gas Used | Cost (at 50 Gwei) |
-|-----------|----------|-------------------|
-| Deploy Contract | ~715,000 | ~0.036 ETH |
-| Register Property | ~112,000 | ~0.006 ETH |
-| Transfer Property | ~50,000 | ~0.003 ETH |
-| View Property | 0 (read-only) | Free |
+| Operation         | Gas Used      | Cost (at 50 Gwei) |
+| ----------------- | ------------- | ----------------- |
+| Deploy Contract   | ~715,000      | ~0.036 ETH        |
+| Register Property | ~112,000      | ~0.006 ETH        |
+| Transfer Property | ~50,000       | ~0.003 ETH        |
+| View Property     | 0 (read-only) | Free              |
 
 ## 🤝 Contributing
 

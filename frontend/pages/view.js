@@ -1,7 +1,7 @@
+import { ethers } from "ethers";
 import { useState } from "react";
 import Navbar from "../components/Navbar";
-import { getContract, getNetworkInfo, getExplorerUrl } from "../utils/contract";
-import { ethers } from "ethers";
+import { getContract, getExplorerUrl, getNetworkInfo } from "../utils/contract";
 
 export default function View() {
   const [id, setId] = useState("");
@@ -27,30 +27,35 @@ export default function View() {
       setNetwork(netInfo);
 
       const contract = await getContract();
-      
+
       // Call getProperty with proper type conversion
       const result = await contract.getProperty(BigInt(id));
-      
+
       // Check if property exists (owner address is not zero address)
-      if (result[3] === "0x0000000000000000000000000000000000000000") {
+      if (result[4] === "0x0000000000000000000000000000000000000000") {
         setError("Property not found. Please register this property first.");
         setSearched(true);
         return;
       }
-      
+
       // Convert result to proper format
+      // Result: [id, name, location, price, owner, latitude, longitude, transferCount]
       const propertyData = {
         id: result[0].toString(),
-        location: result[1],
-        price: result[2],
-        owner: result[3]
+        name: result[1],
+        location: result[2],
+        price: result[3],
+        owner: result[4],
+        latitude: result[5],
+        longitude: result[6],
+        transferCount: result[7].toString(),
       };
 
       setData(propertyData);
       setSearched(true);
     } catch (err) {
       console.error("Error fetching property:", err);
-      
+
       // Better error messages
       if (err.message.includes("could not decode")) {
         setError("Property not found. Please register this property first.");
@@ -59,9 +64,11 @@ export default function View() {
       } else if (err.message.includes("network")) {
         setError("Network error. Please check your connection.");
       } else {
-        setError("Property not found or does not exist. Please register it first.");
+        setError(
+          "Property not found or does not exist. Please register it first.",
+        );
       }
-      
+
       setSearched(true);
     } finally {
       setLoading(false);
@@ -83,6 +90,11 @@ export default function View() {
     }
   };
 
+  const formatCoordinates = (coord) => {
+    // Coordinates are stored as fixed point (multiply by 1e6)
+    return (Number(coord) / 1e6).toFixed(6);
+  };
+
   return (
     <>
       <Navbar />
@@ -94,11 +106,7 @@ export default function View() {
               <p>Search and view property information on the blockchain</p>
             </div>
 
-            {error && (
-              <div className="alert alert-error">
-                ✗ {error}
-              </div>
-            )}
+            {error && <div className="alert alert-error">✗ {error}</div>}
 
             <div className="card-body">
               <div className="form-group">
@@ -119,7 +127,7 @@ export default function View() {
                 className="btn btn-accent btn-block"
                 disabled={loading}
               >
-                {loading ? "⏳ Searching..." : "Search Property"}
+                {loading ? "⏳ Searching..." : "🔍 Search Property"}
               </button>
             </div>
           </div>
@@ -134,22 +142,68 @@ export default function View() {
                   <span className="property-label">🆔 Property ID:</span>
                   <span className="property-value">{data.id}</span>
                 </div>
+
+                <div className="property-item">
+                  <span className="property-label">🏠 Property Name:</span>
+                  <span
+                    className="property-value"
+                    style={{ fontWeight: "bold" }}
+                  >
+                    {data.name}
+                  </span>
+                </div>
+
                 <div className="property-item">
                   <span className="property-label">📍 Location:</span>
                   <span className="property-value">{data.location}</span>
                 </div>
+
+                <div className="property-item">
+                  <span className="property-label">🌍 Coordinates:</span>
+                  <div
+                    className="property-value"
+                    style={{ fontSize: "0.95rem" }}
+                  >
+                    <div>Latitude: {formatCoordinates(data.latitude)}°</div>
+                    <div>Longitude: {formatCoordinates(data.longitude)}°</div>
+                  </div>
+                </div>
+
                 <div className="property-item">
                   <span className="property-label">💰 Price:</span>
-                  <span className="property-value">{formatPrice(data.price)}</span>
+                  <span className="property-value">
+                    {formatPrice(data.price)}
+                  </span>
                 </div>
+
                 <div className="property-item">
-                  <span className="property-label">👤 Owner Address:</span>
+                  <span className="property-label">� Transfer History:</span>
+                  <span className="property-value">
+                    {data.transferCount === "0"
+                      ? "🆕 New Property (Never Transferred)"
+                      : data.transferCount === "1"
+                      ? "📦 1 Transfer"
+                      : `📦 ${data.transferCount} Transfers`}
+                  </span>
+                </div>
+
+                <div className="property-item">
+                  <span className="property-label">�👤 Owner Address:</span>
                   <div className="owner-address">
-                    <code className="property-value">{data.owner}</code>
+                    <code
+                      className="property-value"
+                      style={{ fontSize: "0.85rem" }}
+                    >
+                      {data.owner}
+                    </code>
                     {network?.explorer && (
-                      <a 
-                        href={getExplorerUrl("address", data.owner, network.explorer)} 
-                        target="_blank" 
+                      <a
+                        href={getExplorerUrl(
+                          "address",
+                          data.owner,
+                          network.explorer,
+                        )}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="btn-link"
                       >

@@ -8,9 +8,11 @@ const contractAddress =
   "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 const abi = [
-  "function registerProperty(uint256 _id, string memory _location, uint256 _price)",
+  "function registerProperty(string memory _name, string memory _location, uint256 _price, uint _latitude, uint _longitude) public returns (uint)",
   "function transferProperty(uint256 _id, address newOwner)",
-  "function getProperty(uint256 _id) view returns(uint256, string memory, uint256, address)",
+  "function getProperty(uint256 _id) view returns(uint256, string memory, string memory, uint256, address, uint, uint, uint)",
+  "function getNextPropertyId() view returns (uint)",
+  "function getAllProperties(uint _startId, uint _count) view returns (tuple(uint id, string name, string location, uint price, address owner, uint latitude, uint longitude, uint transferCount)[])",
 ];
 
 export const getContract = async () => {
